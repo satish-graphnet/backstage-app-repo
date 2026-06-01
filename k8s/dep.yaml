@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-app
+  namespace: bs-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: python-app
+  template:
+    metadata:
+      labels:
+        app: python-app
+    spec:
+      containers:
+      - name: python-app
+        image: ghcr.io/satish-graphnet/python-app:v1
+        ports:
+        - containerPort: 5000
+      imagePullSecrets:
+      - name: github-auth
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: python-app-service
+  namespace: bs-apps
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 5000
+    targetPort: 5000
+  selector:
+    app: python-app
