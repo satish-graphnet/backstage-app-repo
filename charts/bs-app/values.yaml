@@ -2,7 +2,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/satish-graphnet/python-app
   pullPolicy: IfNotPresent
-  tag: "a744d1"
+  tag: "039a32"
 imagePullSecrets:
   - name: github-auth
 nameOverride: ""
