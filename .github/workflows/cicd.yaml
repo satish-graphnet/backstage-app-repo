@@ -33,6 +33,11 @@ jobs:
         with:
           push: true
           tags: ${{ env.REGISTRY }}/${{ secrets.GH_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.COMMIT_ID }}
+          secrets: |
+             "API_KEY=${{ secrets.API_KEY }}"
+             "NHS_KID=${{ secrets.NHS_KID }}"
+             "NHS_API_KEY=${{ secrets.NHS_API_KEY }}"
+             "NHS_PRIVATE_KEY=${{ secrets.NHS_PRIVATE_KEY }}"
     outputs:
       commit_id: ${{ env.COMMIT_ID }}
 

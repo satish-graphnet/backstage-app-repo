@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+import requests
 import datetime
 import socket
 
@@ -6,11 +7,12 @@ import os
 import secrets
 from functools import wraps
 
+from helper import * 
+
 app = Flask(__name__)
 
 
-# API_KEY = os.environ.get("MY_API_KEY", "fallback-default-key-for-local-dev")
-API_KEY = "dmj@unb6GHD0egb6bxuwfjPNv3ELFs49yRh*MEf"
+API_KEY = os.environ.get('API_KEY', 'my_default_local_secret') 
 
 def require_api_key(f):
     """Decorator to restrict endpoint access to valid API keys."""
@@ -28,23 +30,40 @@ def require_api_key(f):
         return f(*args, **kwargs)
     return decorated_function
 
-@app.route('/api/v1/info')
+@app.route('/api/access-token/v1/info')
 def info():
     return jsonify({
     	'time': datetime.datetime.now().strftime("%I:%M:%S%p  on %B %d, %Y"),
     	'hostname': socket.gethostname(),
-        'message': 'You are doing great, little human!!',
+        'message': 'access-token-api-info:v1',
         'deployed_on': 'kubernetes'
     })
 
 
-@app.route('/api/v1/get_token')
+@app.route('/api/access-token/v1/get-token')
 @require_api_key
 def getToken():
-	# Do an actual check here
-    return jsonify({'token': 'xyz'}), 200
 
-@app.route('/api/v1/healthz')
+    url = "https://int.api.service.nhs.uk/oauth2/token"
+
+    headers = {
+        'content-type': 'application/x-www-form-urlencoded'
+    }
+    
+    payload = {
+        'grant_type': 'client_credentials',
+        'client_assertion_type': 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+        'client_assertion': get_jwt()
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, data=payload)
+        return jsonify(response.json()), response.status_code
+        
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/access-token/v1/healthz')
 def health():
 	# Do an actual check here
     return jsonify({'status': 'up'}), 200
